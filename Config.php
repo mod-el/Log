@@ -1,7 +1,8 @@
-<?php
-namespace Model;
+<?php namespace Model\Log;
 
-class Log_Config extends Module_Config {
+use Model\Core\Module_Config;
+
+class Config extends Module_Config {
 	public function install(array $data = []){
 		$q1 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_log` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,

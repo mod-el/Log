@@ -1,7 +1,8 @@
-<?php
-namespace Model;
+<?php namespace Model\Log;
 
-class Log extends Module{
+use Model\Core\Module;
+
+class Log extends Module {
 	/** @var mixed */
 	private $queryLog = false;
 	/** @var mixed */
@@ -67,7 +68,7 @@ class Log extends Module{
 				)');
 
 				$this->model->switchEvents(true);
-			} catch (Exception $e) {
+			} catch (\Exception $e) {
 				$this->model->switchEvents(true);
 				throw $e;
 			}
