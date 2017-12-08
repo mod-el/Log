@@ -112,7 +112,7 @@ class Log extends Module {
 						unset($get['url']);
 					$user = isset($_COOKIE['ZKID']) ? $db->quote($_COOKIE['ZKID']) : 'NULL';
 
-					$url = '/'.$this->model->prefix(false, ['path'=>false]).implode('/', $this->model->getRequest());
+					$url = '/'.$this->model->prefix([], ['path'=>false]).implode('/', $this->model->getRequest());
 					if($get)
 						$url .= '?'.http_build_query($get);
 
