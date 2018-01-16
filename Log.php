@@ -11,7 +11,7 @@ class Log extends Module {
 	/**
 	 * @param mixed $options
 	 */
-	function init($options){
+	function init(array $options){
 		$this->model->on('Db_query', function($data){
 			$this->queryLog = $data;
 		});
@@ -107,7 +107,7 @@ class Log extends Module {
 					if(strlen($prepared_session)+strlen($prepared_events)>MYSQL_MAX_ALLOWED_PACKET-400)
 						throw new \Exception('Packet too large');
 
-					$get = $this->model->getInput(false, 'get');
+					$get = $this->model->getInput(null, 'get');
 					if(isset($get['url']))
 						unset($get['url']);
 					$user = isset($_COOKIE['ZKID']) ? $db->quote($_COOKIE['ZKID']) : 'NULL';

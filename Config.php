@@ -3,7 +3,8 @@
 use Model\Core\Module_Config;
 
 class Config extends Module_Config {
-	public function install(array $data = []){
+	public function install(array $data = []): bool
+	{
 		$q1 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_log` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `session` blob NOT NULL,
