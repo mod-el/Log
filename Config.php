@@ -2,7 +2,8 @@
 
 use Model\Core\Module_Config;
 
-class Config extends Module_Config {
+class Config extends Module_Config
+{
 	public function install(array $data = []): bool
 	{
 		$q1 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_log` (
@@ -31,7 +32,7 @@ class Config extends Module_Config {
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		if(!$q1 or !$q2)
+		if (!$q1 or !$q2)
 			return false;
 
 		return true;

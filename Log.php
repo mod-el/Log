@@ -2,7 +2,8 @@
 
 use Model\Core\Module;
 
-class Log extends Module {
+class Log extends Module
+{
 	/** @var mixed */
 	private $queryLog = false;
 	/** @var mixed */
@@ -11,44 +12,45 @@ class Log extends Module {
 	/**
 	 * @param mixed $options
 	 */
-	function init(array $options){
-		$this->model->on('Db_query', function($data){
+	function init(array $options)
+	{
+		$this->model->on('Db_query', function ($data) {
 			$this->queryLog = $data;
 		});
 
-		$this->model->on('Db_queryExecuted', function($data){
-			if($this->queryLog===false)
+		$this->model->on('Db_queryExecuted', function ($data) {
+			if ($this->queryLog === false)
 				return false;
 
 			$data = array_merge($this->queryLog, $data);
 			$this->queryLog = false;
 
-			if(!in_array($data['type'], array('INSERT', 'UPDATE', 'DELETE')))
+			if (!in_array($data['type'], array('INSERT', 'UPDATE', 'DELETE')))
 				return false;
 
 			$users = $this->model->allModules('User');
 
-			if(count($users)==0){
+			if (count($users) == 0) {
 				$users_string = false;
-			}elseif(count($users)==1){
+			} elseif (count($users) == 1) {
 				$users_string = reset($users)->logged();
-			}else{
+			} else {
 				$users_string = array();
-				foreach($users as $n=>$user)
+				foreach ($users as $n => $user)
 					$users_string[$n] = $user->logged();
 				$users_string = json_encode($users_string);
 			}
 
 			$row_id = null;
-			if($data['type']=='INSERT' and isset($data['id'])){
+			if ($data['type'] == 'INSERT' and isset($data['id'])) {
 				$row_id = $data['id'];
-			}elseif($data['type']!='INSERT' and preg_match('/WHERE `?id`? = \'?[0-9]+\'?/i', $data['qry'])){
-				$row_id = preg_replace('/^.+ WHERE `?id`? = \'?([0-9]+)\'?.*$/i', '$1',$data['qry']);
+			} elseif ($data['type'] != 'INSERT' and preg_match('/WHERE `?id`? = \'?[0-9]+\'?/i', $data['qry'])) {
+				$row_id = preg_replace('/^.+ WHERE `?id`? = \'?([0-9]+)\'?.*$/i', '$1', $data['qry']);
 			}
 
 			$qrystring = $_GET;
-			if(isset($qrystring['url'])) unset($qrystring['url']);
-			if(isset($qrystring['zkrand'])) unset($qrystring['zkrand']);
+			if (isset($qrystring['url'])) unset($qrystring['url']);
+			if (isset($qrystring['zkrand'])) unset($qrystring['zkrand']);
 			$qrystring = http_build_query($qrystring);
 
 			try {
@@ -74,7 +76,7 @@ class Log extends Module {
 			}
 		});
 
-		$this->model->on('error', function($data){
+		$this->model->on('error', function ($data) {
 			$this->logPageExecution = true;
 		});
 	}
@@ -82,16 +84,17 @@ class Log extends Module {
 	/**
 	 *
 	 */
-	public function terminate(){
-		if($this->logPageExecution){
+	public function terminate()
+	{
+		if ($this->logPageExecution) {
 			$this->model->switchEvents(false);
 
 			$db = $this->model->_Db;
-			if($db){
-				try{
-					if(!defined('MYSQL_MAX_ALLOWED_PACKET')){
+			if ($db) {
+				try {
+					if (!defined('MYSQL_MAX_ALLOWED_PACKET')) {
 						$max_allowed_packet_query = $db->query('SHOW VARIABLES LIKE \'max_allowed_packet\'')->fetch();
-						if($max_allowed_packet_query)
+						if ($max_allowed_packet_query)
 							define('MYSQL_MAX_ALLOWED_PACKET', $max_allowed_packet_query['Value']);
 						else
 							define('MYSQL_MAX_ALLOWED_PACKET', 1000000);
@@ -102,19 +105,19 @@ class Log extends Module {
 					$events = $this->model->getEventsHistory();
 					$prepared_events = $db->quote(json_encode($events));
 
-					if(strlen($prepared_session)+strlen($prepared_events)>MYSQL_MAX_ALLOWED_PACKET-400)
+					if (strlen($prepared_session) + strlen($prepared_events) > MYSQL_MAX_ALLOWED_PACKET - 400)
 						$prepared_session = '\'TOO LARGE\'';
-					if(strlen($prepared_session)+strlen($prepared_events)>MYSQL_MAX_ALLOWED_PACKET-400)
+					if (strlen($prepared_session) + strlen($prepared_events) > MYSQL_MAX_ALLOWED_PACKET - 400)
 						throw new \Exception('Packet too large');
 
 					$get = $this->model->getInput(null, 'get');
-					if(isset($get['url']))
+					if (isset($get['url']))
 						unset($get['url']);
 					$user = isset($_COOKIE['ZKID']) ? $db->quote($_COOKIE['ZKID']) : 'NULL';
 
-					$url = '/'.$this->model->prefix([], ['path'=>false]).implode('/', $this->model->getRequest());
-					if($get)
-						$url .= '?'.http_build_query($get);
+					$url = '/' . $this->model->prefix([], ['path' => false]) . implode('/', $this->model->getRequest());
+					if ($get)
+						$url .= '?' . http_build_query($get);
 
 					$db->query('INSERT INTO zk_log(
 						`session`,
@@ -124,16 +127,16 @@ class Log extends Module {
 						`url`,
 						`loading_id`
 					) VALUES(
-						'.$prepared_session.',
-						'.$prepared_events.',
-						'.$db->quote(date('Y-m-d H:i:s')).',
-						'.$user.',
-						'.$db->quote($url).',
+						' . $prepared_session . ',
+						' . $prepared_events . ',
+						' . $db->quote(date('Y-m-d H:i:s')) . ',
+						' . $user . ',
+						' . $db->quote($url) . ',
 						' . $this->model->_Db->quote(ZK_LOADING_ID) . '
 					)');
-				}catch(\Exception $e){
-					if(DEBUG_MODE){
-						echo '<b>ERRORE DURANTE IL LOG:</b> '.getErr($e);
+				} catch (\Exception $e) {
+					if (DEBUG_MODE) {
+						echo '<b>ERRORE DURANTE IL LOG:</b> ' . getErr($e);
 					}
 				}
 			}
