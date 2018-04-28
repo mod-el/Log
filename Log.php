@@ -8,7 +8,10 @@ class Log extends Module
 	/** @var mixed */
 	private $queryLog = false;
 	/** @var array */
-	private $logWith = null;
+	private $logWith = [
+		'ttl' => 1800,
+		'reasons' => [],
+	];
 
 	/**
 	 * @param mixed $options
@@ -92,16 +95,25 @@ class Log extends Module
 	{
 		if ($this->logWith === null) {
 			$this->logWith = [
-				'ttl' => 1,
+				'ttl' => 1800,
 				'reasons' => [],
 			];
 		}
+
 		if ($ttl > $this->logWith['ttl'])
 			$this->logWith['ttl'] = $ttl;
 		if ($reason) {
 			if (!in_array($reason, $this->logWith['reasons']))
 				$this->logWith['reasons'][] = $reason;
 		}
+	}
+
+	/**
+	 * Disable logging for the current execution
+	 */
+	public function disableLog()
+	{
+		$this->logWith = null;
 	}
 
 	/**
