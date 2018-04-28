@@ -111,9 +111,18 @@ class Log extends Module
 	/**
 	 * Disable logging for the current execution
 	 */
-	public function disableLog()
+	public function disableAutoLog()
 	{
 		$this->logWith = null;
+	}
+
+	/**
+	 * @param array $where
+	 * @return \Generator
+	 */
+	public function getLogs(array $where = []): \Generator
+	{
+		return $this->model->_Db->select_all('zk_log', $where, ['order_by' => 'date DESC']);
 	}
 
 	/**
@@ -195,6 +204,11 @@ class Log extends Module
 		}
 	}
 
+	/**
+	 * @param string $module
+	 * @param string $event
+	 * @param array $data
+	 */
 	public function showEventData(string $module, string $event, array $data)
 	{
 		if (count($data) === 0)

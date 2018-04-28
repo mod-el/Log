@@ -50,7 +50,7 @@
         <div class="logs-row-reason">Reason</div>
     </div>
 	<?php
-	$logs = $this->model->_Db->select_all('zk_log', [], ['order_by' => 'date DESC']);
+	$logs = $this->model->_Log->getLogs();
 	foreach ($logs as $l) {
 		?>
         <a class="clickable logs-row" href="<?= PATH ?>zk/modules/config/Log/<?= $l['id'] ?>">
