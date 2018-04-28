@@ -56,6 +56,7 @@ class Config extends Module_Config
 $config = [
 	\'logOn\' => [
 		\'error\',
+		\'Db_delete\',
 		\'ORM_save\',
 		\'ORM_delete\',
 	],
