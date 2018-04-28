@@ -21,7 +21,9 @@ class Config extends Module_Config
   `loading_id` char(16) COLLATE utf8_unicode_ci NOT NULL,
   `expire_at` datetime DEFAULT NULL,
   `reason` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `expire` (`expire_at`),
+  KEY `date` (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		$q2 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_query_log` (
@@ -36,7 +38,8 @@ class Config extends Module_Config
   `data` datetime NOT NULL,
   `loading_id` char(16) COLLATE utf8_unicode_ci DEFAULT NULL,
   `row_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `date` (`data`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		if (!$q1 or !$q2)
@@ -56,6 +59,19 @@ class Config extends Module_Config
   ADD COLUMN `post` BLOB NULL AFTER `get`,
   ADD COLUMN `expire_at` DATETIME NULL AFTER `loading_id`,
   ADD COLUMN `reason` VARCHAR(250) NULL AFTER `expire_at`;');
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function postUpdate_0_2_1()
+	{
+		$this->model->_Db->query('ALTER TABLE `zk_log` 
+  ADD INDEX `expire` (`expire_at` ASC),
+  ADD INDEX `date` (`date` ASC);');
+		$this->model->_Db->query('ALTER TABLE `zk_query_log` 
+  ADD INDEX `date` (`data` ASC);');
 		return true;
 	}
 
