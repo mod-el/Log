@@ -1,6 +1,5 @@
 <?php namespace Model\Log;
 
-use Model\Core\Core;
 use Model\Core\Module;
 
 class Log extends Module
@@ -73,9 +72,9 @@ class Log extends Module
 			}
 		});
 
-		foreach (($config['logOn'] ?? []) as $event) {
-			$this->model->on($event, function ($data) use ($event) {
-				$this->logEvents($event);
+		foreach (($config['logOn'] ?? []) as $event => $ttl) {
+			$this->model->on($event, function ($data) use ($event, $ttl) {
+				$this->logEvents($event, $ttl);
 			});
 		}
 	}

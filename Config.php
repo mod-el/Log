@@ -55,10 +55,10 @@ class Config extends Module_Config
 			return '<?php
 $config = [
 	\'logOn\' => [
-		\'error\',
-		\'Db_delete\',
-		\'ORM_save\',
-		\'ORM_delete\',
+		\'error\' => null,
+		\'Db_delete\' => null,
+		\'ORM_save\' => null,
+		\'ORM_delete\' => null,
 	],
 	\'tempTtl\' => 1800,
 	\'defaultTtl\' => 1209600,
