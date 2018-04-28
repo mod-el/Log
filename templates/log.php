@@ -11,6 +11,8 @@
         padding: 4px;
         box-sizing: border-box;
         vertical-align: middle;
+        -ms-word-wrap: break-word;
+        word-wrap: break-word;
     }
 
     .logs-headings {
