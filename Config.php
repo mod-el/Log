@@ -81,14 +81,11 @@ class Config extends Module_Config
 	public function cleanUp()
 	{
 		$this->model->_Db->delete('zk_log', [
-			'or' => [
-				['expire_at', null],
-				['expire_at', '<=', date('Y-m-d H:i:s')],
-			],
+			['expire_at', '<=', date('Y-m-d H:i:s')],
 		]);
 
 		$threshold = date_create();
-		$threshold->modify('-7 days');
+		$threshold->modify('-14 days');
 		$this->model->_Db->delete('zk_query_log', [
 			'data' => ['<=', $threshold->format('Y-m-d H:i:s')],
 		]);

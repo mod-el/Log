@@ -86,9 +86,9 @@ class Log extends Module
 	 * Logs the current execution
 	 *
 	 * @param string|null $reason
-	 * @param int $ttl
+	 * @param int $ttl (default 14 days)
 	 */
-	public function logEvents(string $reason = null, int $ttl = 7)
+	public function logEvents(string $reason = null, int $ttl = 1209600)
 	{
 		if ($this->logWith === null) {
 			$this->logWith = [
@@ -149,7 +149,7 @@ class Log extends Module
 					$url = '/' . $this->model->prefix([], ['path' => false]) . implode('/', $this->model->getRequest());
 
 					$expireAt = date_create();
-					$expireAt->modify('+' . $this->logWith['ttl'] . ' days');
+					$expireAt->modify('+' . $this->logWith['ttl'] . ' seconds');
 
 					$id = $db->query('INSERT INTO zk_log(
 						`date`,
