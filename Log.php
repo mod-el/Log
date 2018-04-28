@@ -6,8 +6,8 @@ class Log extends Module
 {
 	/** @var mixed */
 	private $queryLog = false;
-	/** @var mixed */
-	private $logPageExecution = false;
+	/** @var int */
+	private $logWithTtl = null;
 
 	/**
 	 * @param mixed $options
@@ -77,16 +77,29 @@ class Log extends Module
 		});
 
 		$this->model->on('error', function ($data) {
-			$this->logPageExecution = true;
+			$this->logEvents();
 		});
 	}
 
 	/**
+	 * Logs the current execution
 	 *
+	 * @param int|null $ttl
+	 */
+	public function logEvents(int $ttl = null)
+	{
+		if ($ttl === null)
+			$ttl = 7;
+		if (!$this->logWithTtl or $ttl > $this->logWithTtl)
+			$this->logWithTtl = $ttl;
+	}
+
+	/**
+	 * On execution termination, it logs events if it has been told to
 	 */
 	public function terminate()
 	{
-		if ($this->logPageExecution) {
+		if ($this->logWithTtl) {
 			$this->model->switchEvents(false);
 
 			$db = $this->model->_Db;
@@ -105,38 +118,51 @@ class Log extends Module
 					$events = $this->model->getEventsHistory();
 					$prepared_events = $db->quote(json_encode($events));
 
-					if (strlen($prepared_session) + strlen($prepared_events) > MYSQL_MAX_ALLOWED_PACKET - 400)
+					if (strlen($prepared_session) > MYSQL_MAX_ALLOWED_PACKET - 400)
 						$prepared_session = '\'TOO LARGE\'';
-					if (strlen($prepared_session) + strlen($prepared_events) > MYSQL_MAX_ALLOWED_PACKET - 400)
+					if (strlen($prepared_events) > MYSQL_MAX_ALLOWED_PACKET - 400)
 						throw new \Exception('Packet too large');
 
 					$get = $this->model->getInput(null, 'get');
 					if (isset($get['url']))
 						unset($get['url']);
+
 					$user = isset($_COOKIE['ZKID']) ? $db->quote($_COOKIE['ZKID']) : 'NULL';
 
-					$url = '/' . $this->model->prefix([], ['path' => false]) . implode('/', $this->model->getRequest());
-					if ($get)
-						$url .= '?' . http_build_query($get);
+					$post = $this->model->getInput(null, 'post');
 
-					$db->query('INSERT INTO zk_log(
-						`session`,
-						`events`,
+					$prepared_post = $db->quote(json_encode($post));
+
+					if (strlen($prepared_post) > MYSQL_MAX_ALLOWED_PACKET - 400)
+						$prepared_post = '\'TOO LARGE\'';
+
+					$url = '/' . $this->model->prefix([], ['path' => false]) . implode('/', $this->model->getRequest());
+
+					$expireAt = date_create();
+					$expireAt->modify('+' . $this->logWithTtl . ' days');
+
+					$id = $db->query('INSERT INTO zk_log(
 						`date`,
 						`user`,
 						`url`,
-						`loading_id`
+						`get`,
+						`loading_id`,
+						`expire_at`
 					) VALUES(
-						' . $prepared_session . ',
-						' . $prepared_events . ',
 						' . $db->quote(date('Y-m-d H:i:s')) . ',
 						' . $user . ',
 						' . $db->quote($url) . ',
-						' . $this->model->_Db->quote(ZK_LOADING_ID) . '
-					)');
+						' . $db->quote(http_build_query($get)) . ',
+						' . $this->model->_Db->quote(ZK_LOADING_ID) . ',
+						' . $db->quote($expireAt->format('Y-m-d H:i:s')) . '
+					)', null, 'INSERT');
+
+					$db->query('UPDATE zk_log SET `session` = ' . $prepared_session . ' WHERE `id` = ' . $id);
+					$db->query('UPDATE zk_log SET `events` = ' . $prepared_events . ' WHERE `id` = ' . $id);
+					$db->query('UPDATE zk_log SET `post` = ' . $prepared_post . ' WHERE `id` = ' . $id);
 				} catch (\Exception $e) {
 					if (DEBUG_MODE) {
-						echo '<b>ERRORE DURANTE IL LOG:</b> ' . getErr($e);
+						echo ' < b>ERRORE DURANTE IL LOG:</b > ' . getErr($e);
 					}
 				}
 			}

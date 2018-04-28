@@ -4,18 +4,23 @@ use Model\Core\Module_Config;
 
 class Config extends Module_Config
 {
+	public $hasCleanUp = true;
+
 	public function install(array $data = []): bool
 	{
 		$q1 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_log` (
-		  `id` int(11) NOT NULL AUTO_INCREMENT,
-		  `session` blob NOT NULL,
-		  `events` blob NOT NULL,
-		  `date` datetime NOT NULL,
-		  `user` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-		  `url` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-		  `loading_id` char(16) COLLATE utf8_unicode_ci NOT NULL,
-		  PRIMARY KEY (`id`)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `session` blob NOT NULL,
+  `events` blob NOT NULL,
+  `date` datetime NOT NULL,
+  `user` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `url` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `get` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `post` blob,
+  `loading_id` char(16) COLLATE utf8_unicode_ci NOT NULL,
+  `expire_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		$q2 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_query_log` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -36,5 +41,36 @@ class Config extends Module_Config
 			return false;
 
 		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function postUpdate_0_2_0()
+	{
+		$this->model->_Db->query('ALTER TABLE `zk_log`
+ADD COLUMN `get` VARCHAR(255) NULL AFTER `url`,
+ADD COLUMN `post` BLOB NULL AFTER `get`,
+ADD COLUMN `expire_at` DATETIME NULL AFTER `loading_id`;');
+		return true;
+	}
+
+	/**
+	 *
+	 */
+	public function cleanUp()
+	{
+		$this->model->_Db->delete('zk_log', [
+			'or' => [
+				['expire_at', null],
+				['expire_at', '<=', date('Y-m-d H:i:s')],
+			],
+		]);
+
+		$threshold = date_create();
+		$threshold->modify('-7 days');
+		$this->model->_Db->delete('zk_query_log', [
+			'data' => ['<=', $threshold->format('Y-m-d H:i:s')],
+		]);
 	}
 }
