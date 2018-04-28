@@ -102,29 +102,29 @@ if (!$events) {
 	$lastTime = null;
 	foreach ($events as $idx => $e) {
 		?>
-        <a href="#" onclick="contentLightbox('data-<?= $idx ?>'); return false" class="clickable logs-row">
-            <span class="logs-row-module">
-                <?= entities($e['module']) ?>
-            </span>
-            <span class="logs-row-event">
-                <?= entities($e['event']) ?>
-            </span>
-            <span class="logs-row-time">
-                <?php
+        <div onclick="contentLightbox('data-<?= $idx ?>')" class="clickable logs-row">
+            <div class="logs-row-module">
+				<?= entities($e['module']) ?>
+            </div>
+            <div class="logs-row-event">
+				<?= entities($e['event']) ?>
+            </div>
+            <div class="logs-row-time">
+				<?php
 				if ($startTime === null)
 					$startTime = $e['time'];
 				echo $e['time'] - $startTime;
 				?>
-            </span>
-            <span class="logs-row-offset">
-                <?php
+            </div>
+            <div class="logs-row-offset">
+				<?php
 				if ($lastTime !== null) {
 					echo $e['time'] - $lastTime;
 				}
 				$lastTime = $e['time'];
 				?>
-            </span>
-        </a>
+            </div>
+        </div>
         <div id="data-<?= $idx ?>" style="display: none">
             <pre>
                 <?php
