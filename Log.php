@@ -6,8 +6,8 @@ class Log extends Module
 {
 	/** @var mixed */
 	private $queryLog = false;
-	/** @var int */
-	private $logWithTtl = null;
+	/** @var array */
+	private $logWith = null;
 
 	/**
 	 * @param mixed $options
@@ -77,21 +77,30 @@ class Log extends Module
 		});
 
 		$this->model->on('error', function ($data) {
-			$this->logEvents();
+			$this->logEvents('error');
 		});
 	}
 
 	/**
 	 * Logs the current execution
 	 *
-	 * @param int|null $ttl
+	 * @param string|null $reason
+	 * @param int $ttl
 	 */
-	public function logEvents(int $ttl = null)
+	public function logEvents(string $reason = null, int $ttl = 7)
 	{
-		if ($ttl === null)
-			$ttl = 7;
-		if (!$this->logWithTtl or $ttl > $this->logWithTtl)
-			$this->logWithTtl = $ttl;
+		if ($this->logWith === null) {
+			$this->logWith = [
+				'ttl' => 1,
+				'reasons' => [],
+			];
+		}
+		if ($ttl > $this->logWith['ttl'])
+			$this->logWith['ttl'] = $ttl;
+		if ($reason) {
+			if (!in_array($reason, $this->logWith['reasons']))
+				$this->logWith['reasons'][] = $reason;
+		}
 	}
 
 	/**
@@ -99,7 +108,7 @@ class Log extends Module
 	 */
 	public function terminate()
 	{
-		if ($this->logWithTtl) {
+		if ($this->logWith) {
 			$this->model->switchEvents(false);
 
 			$db = $this->model->_Db;
@@ -139,7 +148,7 @@ class Log extends Module
 					$url = '/' . $this->model->prefix([], ['path' => false]) . implode('/', $this->model->getRequest());
 
 					$expireAt = date_create();
-					$expireAt->modify('+' . $this->logWithTtl . ' days');
+					$expireAt->modify('+' . $this->logWith['ttl'] . ' days');
 
 					$id = $db->query('INSERT INTO zk_log(
 						`date`,
@@ -147,14 +156,16 @@ class Log extends Module
 						`url`,
 						`get`,
 						`loading_id`,
-						`expire_at`
+						`expire_at`,
+						`reason`
 					) VALUES(
 						' . $db->quote(date('Y-m-d H:i:s')) . ',
 						' . $user . ',
 						' . $db->quote($url) . ',
 						' . $db->quote(http_build_query($get)) . ',
 						' . $this->model->_Db->quote(ZK_LOADING_ID) . ',
-						' . $db->quote($expireAt->format('Y-m-d H:i:s')) . '
+						' . $db->quote($expireAt->format('Y-m-d H:i:s')) . ',
+						' . $db->quote(implode(',', $this->logWith['reasons'])) . '
 					)', null, 'INSERT');
 
 					$db->query('UPDATE zk_log SET `session` = ' . $prepared_session . ' WHERE `id` = ' . $id);

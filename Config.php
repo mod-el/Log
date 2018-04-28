@@ -4,6 +4,7 @@ use Model\Core\Module_Config;
 
 class Config extends Module_Config
 {
+	public $configurable = true;
 	public $hasCleanUp = true;
 
 	public function install(array $data = []): bool
@@ -19,23 +20,24 @@ class Config extends Module_Config
   `post` blob,
   `loading_id` char(16) COLLATE utf8_unicode_ci NOT NULL,
   `expire_at` datetime DEFAULT NULL,
+  `reason` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		$q2 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_query_log` (
-		  `id` int(11) NOT NULL AUTO_INCREMENT,
-		  `path` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-		  `get` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-		  `type` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
-		  `table` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
-		  `query` text COLLATE utf8_unicode_ci NOT NULL,
-		  `rows` int(11) DEFAULT NULL,
-		  `user` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-		  `data` datetime NOT NULL,
-		  `loading_id` char(16) COLLATE utf8_unicode_ci DEFAULT NULL,
-		  `row_id` int(11) DEFAULT NULL,
-		  PRIMARY KEY (`id`)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `path` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `get` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `type` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
+  `table` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `query` text COLLATE utf8_unicode_ci NOT NULL,
+  `rows` int(11) DEFAULT NULL,
+  `user` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `data` datetime NOT NULL,
+  `loading_id` char(16) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `row_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
 		if (!$q1 or !$q2)
 			return false;
@@ -49,9 +51,10 @@ class Config extends Module_Config
 	public function postUpdate_0_2_0()
 	{
 		$this->model->_Db->query('ALTER TABLE `zk_log`
-ADD COLUMN `get` VARCHAR(255) NULL AFTER `url`,
-ADD COLUMN `post` BLOB NULL AFTER `get`,
-ADD COLUMN `expire_at` DATETIME NULL AFTER `loading_id`;');
+  ADD COLUMN `get` VARCHAR(255) NULL AFTER `url`,
+  ADD COLUMN `post` BLOB NULL AFTER `get`,
+  ADD COLUMN `expire_at` DATETIME NULL AFTER `loading_id`,
+  ADD COLUMN `reason` VARCHAR(250) NULL AFTER `expire_at`;');
 		return true;
 	}
 
@@ -72,5 +75,14 @@ ADD COLUMN `expire_at` DATETIME NULL AFTER `loading_id`;');
 		$this->model->_Db->delete('zk_query_log', [
 			'data' => ['<=', $threshold->format('Y-m-d H:i:s')],
 		]);
+	}
+
+	/**
+	 * @param array $request
+	 * @return null|string
+	 */
+	public function getTemplate(array $request)
+	{
+		return $request[2] == 'config' ? 'log' : null;
 	}
 }
