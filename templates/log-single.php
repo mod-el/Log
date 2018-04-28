@@ -26,19 +26,23 @@ if (!$logRow) {
     }
 
     .logs-row-module {
-        width: 25%;
+        width: 10%;
     }
 
     .logs-row-event {
         width: 25%;
     }
 
+    .logs-row-data {
+        width: 23%;
+    }
+
     .logs-row-time {
-        width: 25%;
+        width: 21%;
     }
 
     .logs-row-offset {
-        width: 25%;
+        width: 21%;
     }
 </style>
 
@@ -92,8 +96,9 @@ if (!$events) {
 
 <div>
     <div class="logs-row logs-headings">
-        <div class="logs-row-module">Data</div>
+        <div class="logs-row-module">Module</div>
         <div class="logs-row-event">Event</div>
+        <div class="logs-row-data">Data</div>
         <div class="logs-row-time">Time</div>
         <div class="logs-row-offset">Offset</div>
     </div>
@@ -108,6 +113,11 @@ if (!$events) {
             </div>
             <div class="logs-row-event">
 				<?= entities($e['event']) ?>
+            </div>
+            <div class="logs-row-data">
+				<?php
+				$this->model->_Log->showEventData($e['module'], $e['event'], $e['data']);
+				?>
             </div>
             <div class="logs-row-time">
 				<?php

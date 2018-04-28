@@ -1,5 +1,6 @@
 <?php namespace Model\Log;
 
+use Model\Core\Core;
 use Model\Core\Module;
 
 class Log extends Module
@@ -179,6 +180,27 @@ class Log extends Module
 			}
 
 			$this->model->switchEvents(true);
+		}
+	}
+
+	public function showEventData(string $module, string $event, array $data)
+	{
+		if (count($data) === 0)
+			return;
+		if (count($data) === 1) {
+			echo reset($data);
+			return;
+		}
+
+		switch ($module . '_' . $event) {
+			case 'Core_loadModule':
+				echo $data['module'];
+				if ($data['idx'] !== 0)
+					echo ' (' . $data['idx'] . ')';
+				break;
+			default:
+				echo '[ show ]';
+				break;
 		}
 	}
 }
