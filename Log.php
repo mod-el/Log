@@ -126,6 +126,21 @@ class Log extends Module
 	}
 
 	/**
+	 * @param array $where
+	 * @param int|null $ttl
+	 * @return bool
+	 */
+	public function preserveLogs(array $where = [], int $ttl = null): bool
+	{
+		$expireAt = date_create();
+		$expireAt->modify('+' . $ttl . ' seconds');
+
+		return $this->model->_Db->update('zk_log', $where, [
+			'expire_at' => $expireAt->format('Y-m-d H:i:s'),
+		], ['order_by' => 'date DESC']);
+	}
+
+	/**
 	 * On execution termination, it logs events if it has been told to
 	 */
 	public function terminate()
