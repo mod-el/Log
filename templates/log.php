@@ -66,7 +66,7 @@
                 <?= entities($l['get']) ?>
             </span>
             <span class="logs-row-user">
-                <?= entities(substr($l['user'], 0, 12)) ?>
+                <?= entities($l['user']) ?>
             </span>
             <span class="logs-row-reason">
                 <?= entities($l['reason']) ?>

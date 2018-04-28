@@ -63,11 +63,15 @@ $session = json_decode($logRow['session'], true);
 
 <p>
     <b>Reason:</b> <?= entities($logRow['reason']) ?><br/>
-    <b>Expire at:</b> <?= $logRow['expire_at'] ? date_create($logRow['expire_at'])->format('d/m/Y H:i:s') : '<i>never</i>' ?><br/>
+    <b>Expire at:</b> <?= $logRow['expire_at'] ? date_create($logRow['expire_at'])->format('d/m/Y H:i:s') : '<i>never</i>' ?>
+    <br/>
     <b>Url:</b> <?= entities($logRow['url']) ?><br/>
     <b>Get:</b> <?= entities($logRow['get']) ?><br/>
     <b>Post:</b> <?= $post ? '[<a href="#" onclick="contentLightbox(\'post-content\'); return false"> show </a>]' : '<i>empty</i>' ?>
     <br/>
+    <br/>
+    <b>User:</b> <?= entities($logRow['user']) ?><br/>
+    <b>User Hash:</b> <?= entities($logRow['user_hash']) ?><br/>
     <b>Session:</b> <?= $session ? '[<a href="#" onclick="contentLightbox(\'session-content\'); return false"> show </a>]' : '<i>empty</i>' ?>
     <br/>
 </p>

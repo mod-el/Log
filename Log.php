@@ -35,18 +35,8 @@ class Log extends Module
 			if (!in_array($data['type'], array('INSERT', 'UPDATE', 'DELETE')))
 				return false;
 
-			$users = $this->model->allModules('User');
-
-			if (count($users) == 0) {
-				$users_string = false;
-			} elseif (count($users) == 1) {
-				$users_string = reset($users)->logged();
-			} else {
-				$users_string = array();
-				foreach ($users as $n => $user)
-					$users_string[$n] = $user->logged();
-				$users_string = json_encode($users_string);
-			}
+			$users = $this->getUsersIndicator();
+			$users_string = $users === null ? null : json_encode($users);
 
 			$row_id = null;
 			if ($data['type'] == 'INSERT' and isset($data['id'])) {
@@ -70,7 +60,7 @@ class Log extends Module
 					' . ($data['table'] !== false ? $this->model->_Db->quote($data['table']) : 'NULL') . ',
 					' . $this->model->_Db->quote($data['qry']) . ',
 					' . ($data['rows'] !== false ? $this->model->_Db->quote($data['rows']) : 'NULL') . ',
-					' . ($users_string !== false ? $this->model->_Db->quote($users_string) : 'NULL') . ',
+					' . ($users_string !== null ? $this->model->_Db->quote($users_string) : 'NULL') . ',
 					' . $this->model->_Db->quote(date('Y-m-d H:i:s')) . ',
 					' . $this->model->_Db->quote(ZK_LOADING_ID) . ',
 					' . ($row_id ? $this->model->_Db->quote($row_id) : 'NULL') . '
@@ -187,7 +177,10 @@ class Log extends Module
 					if (isset($get['url']))
 						unset($get['url']);
 
-					$user = isset($_COOKIE['ZKID']) ? $db->quote($_COOKIE['ZKID']) : 'NULL';
+					$user = $this->getUsersIndicator();
+					$user = $user ? $db->quote(json_encode($user)) : 'NULL';
+
+					$user_hash = isset($_COOKIE['ZKID']) ? $db->quote($_COOKIE['ZKID']) : 'NULL';
 
 					$post = $this->model->getInput(null, 'post');
 
@@ -204,6 +197,7 @@ class Log extends Module
 					$id = $db->query('INSERT INTO zk_log(
 						`date`,
 						`user`,
+						`user_hash`,
 						`url`,
 						`get`,
 						`loading_id`,
@@ -212,6 +206,7 @@ class Log extends Module
 					) VALUES(
 						' . $db->quote(date('Y-m-d H:i:s')) . ',
 						' . $user . ',
+						' . $user_hash . ',
 						' . $db->quote($url) . ',
 						' . $db->quote(http_build_query($get)) . ',
 						' . $this->model->_Db->quote(ZK_LOADING_ID) . ',
@@ -256,6 +251,25 @@ class Log extends Module
 			default:
 				echo '[ show ]';
 				break;
+		}
+	}
+
+	/**
+	 * Returns the current logged user (or users, if more than one)
+	 */
+	protected function getUsersIndicator()
+	{
+		$users = $this->model->allModules('User');
+
+		if (count($users) == 0) {
+			return null;
+		} elseif (count($users) == 1 and isset($users[0])) {
+			return reset($users)->logged();
+		} else {
+			$users_arr = [];
+			foreach ($users as $n => $user)
+				$users_arr[$n] = $user->logged();
+			return $users_arr;
 		}
 	}
 }
