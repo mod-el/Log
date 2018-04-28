@@ -48,6 +48,23 @@ class Config extends Module_Config
 		return true;
 	}
 
+	protected function assetsList()
+	{
+		$this->addAsset('config', 'config.php', function () {
+			return '<?php
+$config = [
+	\'logOn\' => [
+		\'error\',
+		\'ORM_save\',
+		\'ORM_delete\',
+	],
+	\'tempTtl\' => 1800,
+	\'defaultTtl\' => 1209600,
+];
+';
+		});
+	}
+
 	/**
 	 * @return bool
 	 */

@@ -9,7 +9,7 @@ class Log extends Module
 	private $queryLog = false;
 	/** @var array */
 	private $logWith = [
-		'ttl' => 1800,
+		'ttl' => 0,
 		'reasons' => [],
 	];
 
@@ -18,6 +18,9 @@ class Log extends Module
 	 */
 	function init(array $options)
 	{
+		$config = $this->retrieveConfig();
+		$this->logWith['ttl'] = $config['tempTtl'] ?? 1800;
+
 		$this->model->on('Db_query', function ($data) {
 			$this->queryLog = $data;
 		});
@@ -80,9 +83,11 @@ class Log extends Module
 			}
 		});
 
-		$this->model->on('error', function ($data) {
-			$this->logEvents('error');
-		});
+		foreach (($config['logOn'] ?? []) as $event) {
+			$this->model->on($event, function ($data) use ($event) {
+				$this->logEvents($event);
+			});
+		}
 	}
 
 	/**
@@ -91,14 +96,19 @@ class Log extends Module
 	 * @param string|null $reason
 	 * @param int $ttl (default 14 days)
 	 */
-	public function logEvents(string $reason = null, int $ttl = 1209600)
+	public function logEvents(string $reason = null, int $ttl = null)
 	{
+		$config = $this->retrieveConfig();
+
 		if ($this->logWith === null) {
 			$this->logWith = [
-				'ttl' => 1800,
+				'ttl' => $config['tempTtl'],
 				'reasons' => [],
 			];
 		}
+
+		if ($ttl === null)
+			$ttl = $config['defaultTtl'];
 
 		if ($ttl > $this->logWith['ttl'])
 			$this->logWith['ttl'] = $ttl;
@@ -132,6 +142,10 @@ class Log extends Module
 	 */
 	public function preserveLogs(array $where = [], int $ttl = null): bool
 	{
+		$config = $this->retrieveConfig();
+		if ($ttl === null)
+			$ttl = $config['defaultTtl'];
+
 		$expireAt = date_create();
 		$expireAt->modify('+' . $ttl . ' seconds');
 
