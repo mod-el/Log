@@ -17,7 +17,7 @@ class Config extends Module_Config
   `user` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
   `url` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `get` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `post` blob,
+  `post` LONGBLOB,
   `loading_id` char(16) COLLATE utf8_unicode_ci NOT NULL,
   `expire_at` datetime DEFAULT NULL,
   `reason` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -51,6 +51,7 @@ class Config extends Module_Config
 	public function postUpdate_0_2_0()
 	{
 		$this->model->_Db->query('ALTER TABLE `zk_log`
+  CHANGE COLUMN `events` `events` LONGBLOB NOT NULL,
   ADD COLUMN `get` VARCHAR(255) NULL AFTER `url`,
   ADD COLUMN `post` BLOB NULL AFTER `get`,
   ADD COLUMN `expire_at` DATETIME NULL AFTER `loading_id`,
@@ -83,6 +84,14 @@ class Config extends Module_Config
 	 */
 	public function getTemplate(array $request)
 	{
-		return $request[2] == 'config' ? 'log' : null;
+		if ($request[2] == 'config') {
+			if (isset($request[4]) and is_numeric($request[4])) {
+				return 'log-single';
+			} else {
+				return 'log';
+			}
+		} else {
+			return null;
+		}
 	}
 }

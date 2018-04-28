@@ -53,7 +53,7 @@
 	$logs = $this->model->_Db->select_all('zk_log', [], ['order_by' => 'date DESC']);
 	foreach ($logs as $l) {
 		?>
-        <a class="clickable logs-row" href="#" onclick="return false">
+        <a class="clickable logs-row" href="<?= PATH ?>zk/modules/config/Log/<?= $l['id'] ?>">
             <span class="logs-row-date">
 				<?= date_create($l['date'])->format('d/m/Y H:i:s') ?>
             </span>

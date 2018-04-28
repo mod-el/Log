@@ -1,0 +1,138 @@
+<?php
+$logRow = $this->model->_Db->select('zk_log', $this->model->getRequest(4));
+if (!$logRow) {
+	echo 'Log row not found';
+	return;
+}
+?>
+<style>
+    .logs-row, a.logs-row {
+        font-size: 0;
+        display: block;
+        color: #333;
+    }
+
+    .logs-row > * {
+        display: inline-block;
+        font-size: 1rem;
+        padding: 4px;
+        box-sizing: border-box;
+        vertical-align: middle;
+    }
+
+    .logs-headings {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .logs-row-module {
+        width: 25%;
+    }
+
+    .logs-row-event {
+        width: 25%;
+    }
+
+    .logs-row-time {
+        width: 25%;
+    }
+
+    .logs-row-offset {
+        width: 25%;
+    }
+</style>
+
+<script>
+	function contentLightbox(id) {
+		lightbox(document.getElementById(id).innerHTML);
+	}
+</script>
+
+<h2>Log - <?= date_create($logRow['date'])->format('d/m/Y H:i:s') ?></h2>
+
+<?php
+$post = json_decode($logRow['post'], true);
+$session = json_decode($logRow['session'], true);
+?>
+
+<p>
+    <b>Reason:</b> <?= entities($logRow['reason']) ?><br/>
+    <b>Expire at:</b> <?= $logRow['expire_at'] ? date_create($logRow['expire_at'])->format('d/m/Y H:i:s') : '' ?><br/>
+    <b>Url:</b> <?= entities($logRow['url']) ?><br/>
+    <b>Get:</b> <?= entities($logRow['get']) ?><br/>
+    <b>Post:</b> <?= $post ? '[<a href="#" onclick="contentLightbox(\'post-content\'); return false"> show </a>]' : '<i>empty</i>' ?>
+    <br/>
+    <b>Session:</b> <?= $session ? '[<a href="#" onclick="contentLightbox(\'session-content\'); return false"> show </a>]' : '<i>empty</i>' ?>
+    <br/>
+</p>
+
+<div id="post-content" style="display: none;">
+    <pre>
+	    <?php
+		var_dump($post);
+		?>
+    </pre>
+</div>
+
+<div id="session-content" style="display: none;">
+    <pre>
+	    <?php
+		var_dump($session);
+		?>
+    </pre>
+</div>
+
+<?php
+$events = json_decode($logRow['events'], true);
+if (!$events) {
+	echo '<p><i>Events log corrupted</i></p>';
+	return;
+}
+?>
+
+<div>
+    <div class="logs-row logs-headings">
+        <div class="logs-row-module">Data</div>
+        <div class="logs-row-event">Event</div>
+        <div class="logs-row-time">Time</div>
+        <div class="logs-row-offset">Offset</div>
+    </div>
+	<?php
+	$startTime = null;
+	$lastTime = null;
+	foreach ($events as $idx => $e) {
+		?>
+        <a href="#" onclick="contentLightbox('data-<?= $idx ?>'); return false" class="clickable logs-row">
+            <span class="logs-row-module">
+                <?= entities($e['module']) ?>
+            </span>
+            <span class="logs-row-event">
+                <?= entities($e['event']) ?>
+            </span>
+            <span class="logs-row-time">
+                <?php
+				if ($startTime === null)
+					$startTime = $e['time'];
+				echo $e['time'] - $startTime;
+				?>
+            </span>
+            <span class="logs-row-offset">
+                <?php
+				if ($lastTime !== null) {
+					echo $e['time'] - $lastTime;
+				}
+				$lastTime = $e['time'];
+				?>
+            </span>
+        </a>
+        <div id="data-<?= $idx ?>" style="display: none">
+            <pre>
+                <?php
+				var_dump($e['data']);
+				?>
+            </pre>
+        </div>
+		<?php
+	}
+	?>
+</div>
