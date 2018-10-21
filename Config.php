@@ -125,7 +125,7 @@ ADD COLUMN `user_hash` VARCHAR(100) NULL AFTER `user`;');
 	 * @param array $request
 	 * @return null|string
 	 */
-	public function getTemplate(array $request)
+	public function getTemplate(array $request): ?string
 	{
 		if ($request[2] == 'config') {
 			if (isset($request[4]) and is_numeric($request[4])) {
