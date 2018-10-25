@@ -25,7 +25,7 @@ class Log extends Module
 		});
 
 		$this->model->on('Db_queryExecuted', function ($data) {
-			if ($this->queryLog === false)
+			if ($this->queryLog === false or !$this->model->getEventsFlag())
 				return false;
 
 			$data = array_merge($this->queryLog, $data);
