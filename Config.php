@@ -12,7 +12,7 @@ class Config extends Module_Config
 		$q1 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `session` blob NOT NULL,
-  `events` blob NOT NULL,
+  `events` longblob NOT NULL,
   `date` datetime NOT NULL,
   `user` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
   `user_hash` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -102,6 +102,15 @@ $config = [
 		$this->model->_Db->query('ALTER TABLE `zk_log` 
 CHANGE COLUMN `user` `user` VARCHAR(200) CHARACTER SET \'utf8\' COLLATE \'utf8_unicode_ci\' NULL DEFAULT NULL ,
 ADD COLUMN `user_hash` VARCHAR(100) NULL AFTER `user`;');
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function postUpdate_0_2_3()
+	{
+		$this->model->_Db->query('ALTER TABLE `zk_log` CHANGE COLUMN `events` `events` LONGBLOB NOT NULL;');
 		return true;
 	}
 
