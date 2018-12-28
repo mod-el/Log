@@ -162,7 +162,7 @@ class Log extends Module
 							define('MYSQL_MAX_ALLOWED_PACKET', 1000000);
 					}
 
-					$prepared_session = $db->quote(json_encode($_SESSION[SESSION_ID]));
+					$prepared_session = $db->quote(json_encode($_SESSION));
 
 					$events = $this->model->getEventsHistory();
 					$prepared_events = $db->quote(json_encode($events));

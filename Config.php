@@ -7,9 +7,9 @@ class Config extends Module_Config
 	public $configurable = true;
 	public $hasCleanUp = true;
 
-	public function install(array $data = []): bool
+	public function init(?array $data = null): bool
 	{
-		$q1 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_log` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `session` blob NOT NULL,
   `events` longblob NOT NULL,
@@ -27,7 +27,7 @@ class Config extends Module_Config
   KEY `date` (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
 
-		$q2 = $this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_query_log` (
+		$this->model->_Db->query('CREATE TABLE IF NOT EXISTS `zk_query_log` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `path` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `get` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
@@ -42,9 +42,6 @@ class Config extends Module_Config
   PRIMARY KEY (`id`),
   KEY `date` (`data`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;');
-
-		if (!$q1 or !$q2)
-			return false;
 
 		return true;
 	}
@@ -131,13 +128,13 @@ ADD COLUMN `user_hash` VARCHAR(100) NULL AFTER `user`;');
 	}
 
 	/**
-	 * @param array $request
+	 * @param string $type
 	 * @return null|string
 	 */
-	public function getTemplate(array $request): ?string
+	public function getTemplate(string $type): ?string
 	{
-		if ($request[2] == 'config') {
-			if (isset($request[4]) and is_numeric($request[4])) {
+		if ($type === 'config') {
+			if (is_numeric($this->model->getRequest(4))) {
 				return 'log-single';
 			} else {
 				return 'log';
