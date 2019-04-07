@@ -105,7 +105,7 @@ ADD COLUMN `user_hash` VARCHAR(100) NULL AFTER `user`;');
 	/**
 	 * @return bool
 	 */
-	public function postUpdate_0_2_3()
+	public function postUpdate_0_2_4()
 	{
 		$this->model->_Db->query('ALTER TABLE `zk_log` CHANGE COLUMN `events` `events` LONGBLOB NOT NULL;');
 		return true;
