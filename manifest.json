@@ -3,7 +3,7 @@
 	"description": "Events, query and errors logging",
 	"version": "0.2.4",
 	"dependencies": {
-		"Core": ">=2.8.1",
+		"Core": ">=2.8.3",
 		"Db": ">=1.5.1"
 	},
 	"zk-pages": [
