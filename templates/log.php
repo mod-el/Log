@@ -44,34 +44,48 @@
 <h2>Logs</h2>
 
 <div>
-    <div class="logs-row logs-headings">
-        <div class="logs-row-date">Data</div>
-        <div class="logs-row-url">Url</div>
-        <div class="logs-row-get">Get</div>
-        <div class="logs-row-user">User</div>
-        <div class="logs-row-reason">Reason</div>
-    </div>
 	<?php
-	$logs = $this->model->_Log->getLogs();
+	$page = $_GET['p'] ?? 1;
+	if (!is_numeric($page) or $page < 1)
+		$page = 1;
+	?>
+	<div style="text-align: right; padding: 10px 0">
+		<?php
+		if ($page > 1)
+			echo '<a href="?p=' . ($page - 1) . '">Pagina precedente</a> - ';
+
+		echo '<a href="?p=' . ($page + 1) . '">Pagina successiva</a>';
+		?>
+	</div>
+
+	<div class="logs-row logs-headings">
+		<div class="logs-row-date">Data</div>
+		<div class="logs-row-url">Url</div>
+		<div class="logs-row-get">Get</div>
+		<div class="logs-row-user">User</div>
+		<div class="logs-row-reason">Reason</div>
+	</div>
+	<?php
+	$logs = $this->model->_Log->getLogs([], $page);
 	foreach ($logs as $l) {
 		?>
-        <a class="clickable logs-row" href="<?= PATH ?>zk/modules/config/Log/<?= $l['id'] ?>">
+		<a class="clickable logs-row" href="<?= PATH ?>zk/modules/config/Log/<?= $l['id'] ?>">
             <span class="logs-row-date">
 				<?= date_create($l['date'])->format('d/m/Y H:i:s') ?>
             </span>
-            <span class="logs-row-url">
+			<span class="logs-row-url">
                 <?= entities($l['url']) ?>
             </span>
-            <span class="logs-row-get">
+			<span class="logs-row-get">
                 <?= entities($l['get']) ?>
             </span>
-            <span class="logs-row-user">
+			<span class="logs-row-user">
                 <?= entities($l['user']) ?>
             </span>
-            <span class="logs-row-reason">
+			<span class="logs-row-reason">
                 <?= entities($l['reason']) ?>
             </span>
-        </a>
+		</a>
 		<?php
 	}
 	?>

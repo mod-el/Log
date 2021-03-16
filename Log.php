@@ -117,11 +117,19 @@ class Log extends Module
 
 	/**
 	 * @param array $where
+	 * @param int|null $page
 	 * @return \Generator
 	 */
-	public function getLogs(array $where = []): \Generator
+	public function getLogs(array $where = [], ?int $page = null): \Generator
 	{
-		return $this->model->_Db->select_all('zk_log', $where, ['order_by' => 'date DESC']);
+		$limit = null;
+		if ($page)
+			$limit = (($page - 1) * 50) . ',50';
+
+		return $this->model->_Db->select_all('zk_log', $where, [
+			'order_by' => 'date DESC',
+			'limit' => $limit,
+		]);
 	}
 
 	/**
