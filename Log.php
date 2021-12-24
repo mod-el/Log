@@ -190,6 +190,12 @@ class Log extends Module
 					$user_hash = isset($_COOKIE['ZKID']) ? $db->quote($_COOKIE['ZKID']) : 'NULL';
 
 					$post = $this->model->getInput(null, 'post');
+					$payload = file_get_contents('php://input');
+					if (empty($post) and !empty($payload)) {
+						$post = json_decode($payload, true); // Provo a decodificarlo in JSON
+						if (!$post)
+							$post = $payload;
+					}
 
 					$prepared_post = $db->quote(json_encode($post));
 
