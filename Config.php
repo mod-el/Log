@@ -57,4 +57,9 @@ $config = [
 			return null;
 		}
 	}
+
+	public function getConfigData(): ?array
+	{
+		return [];
+	}
 }
