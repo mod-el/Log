@@ -7,24 +7,6 @@ class Config extends Module_Config
 	public $configurable = true;
 	public $hasCleanUp = true;
 
-	protected function assetsList()
-	{
-		$this->addAsset('config', 'config.php', function () {
-			return '<?php
-$config = [
-	\'logOn\' => [
-		\'error\' => null,
-		\'Db_delete\' => null,
-		\'ORM_save\' => null,
-		\'ORM_delete\' => null,
-	],
-	\'tempTtl\' => 1800,
-	\'defaultTtl\' => 1209600,
-];
-';
-		});
-	}
-
 	/**
 	 * @param string $type
 	 * @return null|string
