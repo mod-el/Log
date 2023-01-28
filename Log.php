@@ -61,7 +61,7 @@ class Log extends Module
 					' . ($data['rows'] !== false ? $this->model->_Db->quote($data['rows']) : 'NULL') . ',
 					' . ($users_string !== null ? $this->model->_Db->quote($users_string) : 'NULL') . ',
 					' . $this->model->_Db->quote(date('Y-m-d H:i:s')) . ',
-					' . $this->model->_Db->quote(ZK_LOADING_ID) . ',
+					' . $this->model->_Db->quote(MODEL_LOADING_ID) . ',
 					' . ($row_id ? $this->model->_Db->quote($row_id) : 'NULL') . '
 				)');
 
@@ -222,7 +222,7 @@ class Log extends Module
 						' . $user_hash . ',
 						' . $db->quote($url) . ',
 						' . $db->quote(http_build_query($get)) . ',
-						' . $this->model->_Db->quote(ZK_LOADING_ID) . ',
+						' . $this->model->_Db->quote(MODEL_LOADING_ID) . ',
 						' . $db->quote($expireAt->format('Y-m-d H:i:s')) . ',
 						' . $db->quote(implode(',', $this->logWith['reasons'])) . '
 					)', null, 'INSERT');
