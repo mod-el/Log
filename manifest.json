@@ -1,11 +1,14 @@
 {
 	"name": "Log",
 	"description": "Events, query and errors logging",
-	"version": "0.2.4",
+	"version": "0.3.0",
 	"dependencies": {
-		"Core": ">=2.8.3",
+		"Core": ">=3.0.0",
 		"Db": ">=1.5.1"
 	},
+	"requires": [
+		"model/logger"
+	],
 	"zk-pages": [
 		{
 			"text": "Logs",

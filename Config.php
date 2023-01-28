@@ -26,22 +26,6 @@ $config = [
 	}
 
 	/**
-	 *
-	 */
-	public function cleanUp()
-	{
-		$this->model->_Db->delete('zk_log', [
-			['expire_at', '<=', date('Y-m-d H:i:s')],
-		]);
-
-		$threshold = date_create();
-		$threshold->modify('-14 days');
-		$this->model->_Db->delete('zk_query_log', [
-			'data' => ['<=', $threshold->format('Y-m-d H:i:s')],
-		]);
-	}
-
-	/**
 	 * @param string $type
 	 * @return null|string
 	 */

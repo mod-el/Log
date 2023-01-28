@@ -1,5 +1,5 @@
 <?php
-$logRow = $this->model->_Db->select('zk_log', $this->model->getRequest(4));
+$logRow = \Model\Db\Db::getConnection()->select('model_logs', $this->model->getRequest(4));
 if (!$logRow) {
 	echo 'Log row not found';
 	return;
@@ -25,10 +25,6 @@ if (!$logRow) {
     .logs-headings {
         font-weight: bold;
         color: #000;
-    }
-
-    .logs-row-module {
-        width: 10%;
     }
 
     .logs-row-event {
@@ -57,12 +53,13 @@ if (!$logRow) {
 <h2>Log - <?= date_create($logRow['date'])->format('d/m/Y H:i:s') ?></h2>
 
 <?php
-$post = json_decode($logRow['post'], true);
+$server = json_decode($logRow['server'], true);
 $session = json_decode($logRow['session'], true);
+$post = json_decode($logRow['post'], true);
 ?>
 
 <p>
-    <b>Reason:</b> <?= entities($logRow['reason']) ?><br/>
+    <b>Reason:</b> <?= entities($logRow['reasons']) ?><br/>
     <b>Expires at:</b> <?= $logRow['expire_at'] ? date_create($logRow['expire_at'])->format('d/m/Y H:i:s') : '<i>never</i>' ?>
     <br/>
     <b>Url:</b> <?= entities($logRow['url']) ?><br/>
@@ -70,8 +67,8 @@ $session = json_decode($logRow['session'], true);
     <b>Post:</b> <?= $post ? '[<a href="#" onclick="contentLightbox(\'post-content\'); return false"> show </a>]' : '<i>empty</i>' ?>
     <br/>
     <br/>
-    <b>User:</b> <?= entities($logRow['user']) ?><br/>
     <b>User hash:</b> <?= entities($logRow['user_hash']) ?><br/>
+    <b>Server:</b> <?= $server ? '[<a href="#" onclick="contentLightbox(\'server-content\'); return false"> show </a>]' : '<i>empty</i>' ?><br/>
     <b>Session:</b> <?= $session ? '[<a href="#" onclick="contentLightbox(\'session-content\'); return false"> show </a>]' : '<i>empty</i>' ?>
     <br/>
 </p>
@@ -84,11 +81,19 @@ $session = json_decode($logRow['session'], true);
     </pre>
 </div>
 
+<div id="server-content" style="display: none;">
+    <pre>
+	    <?php
+	    var_dump($server);
+	    ?>
+    </pre>
+</div>
+
 <div id="session-content" style="display: none;">
     <pre>
 	    <?php
-		var_dump($session);
-		?>
+	    var_dump($session);
+	    ?>
     </pre>
 </div>
 
@@ -102,7 +107,6 @@ if (!$events) {
 
 <div>
     <div class="logs-row logs-headings">
-        <div class="logs-row-module">Module</div>
         <div class="logs-row-event">Event</div>
         <div class="logs-row-data">Data</div>
         <div class="logs-row-time">Time</div>
@@ -114,15 +118,12 @@ if (!$events) {
 	foreach ($events as $idx => $e) {
 		?>
         <div onclick="contentLightbox('data-<?= $idx ?>')" class="clickable logs-row">
-            <div class="logs-row-module">
-				<?= entities($e['module']) ?>
-            </div>
             <div class="logs-row-event">
 				<?= entities($e['event']) ?>
             </div>
             <div class="logs-row-data">
 				<?php
-				$this->model->_Log->showEventData($e['module'], $e['event'], $e['data']);
+				$this->model->_Log->showEventData($e['event'], $e['data']);
 				?>
             </div>
             <div class="logs-row-time">
