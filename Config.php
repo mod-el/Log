@@ -4,8 +4,8 @@ use Model\Core\Module_Config;
 
 class Config extends Module_Config
 {
-	public $configurable = true;
-	public $hasCleanUp = true;
+	public bool $configurable = true;
+	public bool $hasCleanUp = true;
 
 	/**
 	 * @param string $type
